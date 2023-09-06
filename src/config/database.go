@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -15,11 +18,11 @@ type Connection struct {
 
 func ConnectDatabase() *gorm.DB {
 	connection := Connection{
-		Host:     "localhost",
-		Port:     "5432",
-		User:     "postgres",
-		Password: "postgres",
-		Dbname:   "rinhabackend",
+		Host:     os.Getenv("RINHA_DB_HOST"),
+		Port:     os.Getenv("RINHA_DB_PORT"),
+		User:     os.Getenv("RINHA_DB_USER"),
+		Password: os.Getenv("RINHA_DB_PASSWORD"),
+		Dbname:   os.Getenv("RINHA_DB_NAME"),
 	}
 
 	db, err := gorm.Open("postgres",
@@ -28,9 +31,11 @@ func ConnectDatabase() *gorm.DB {
 			" password="+connection.Password+" sslmode=disable")
 	if err != nil {
 		panic("Failed to connect database")
+	} else {
+		fmt.Println("Conectou")
 	}
 
-	db.LogMode(false)
+	db.LogMode(true)
 
 	return db
 }

@@ -9,6 +9,9 @@ import (
 func InitRoutes() *gin.Engine {
 	r := gin.Default()
 
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{"message": "pong"})
+	})
 	r.POST("/pessoas", controllers.CreatePessoa)
 	r.GET("/pessoas", controllers.GetPessoas)
 	r.GET("/pessoas/:id", controllers.GetPessoaById)
