@@ -35,7 +35,7 @@ func ConnectDatabase() *gorm.DB {
 		fmt.Println("Conectou")
 	}
 
-	db.LogMode(true)
+	db.LogMode(false)
 
 	return db
 }
