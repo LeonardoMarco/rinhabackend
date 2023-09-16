@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"fmt"
 	"rinhabackendleo/src/config"
 
 	"github.com/lib/pq"
@@ -16,6 +18,14 @@ type Pessoas struct {
 
 func CreatePessoa(req Pessoas) (Pessoas, error) {
 	db := config.ConnectDatabase()
+	client := config.ConnectRedis()
+
+	val, _ := client.Get(req.Apelido).Result()
+
+	if val != "" {
+		return req, fmt.Errorf("duplicate")
+	}
+
 	var pessoa Pessoas
 
 	query := `
@@ -29,6 +39,20 @@ func CreatePessoa(req Pessoas) (Pessoas, error) {
 	`
 
 	err := db.Raw(query, req.Apelido, req.Nome, req.Nascimento, req.Stack).Scan(&pessoa).Error
+
+	json, _ := json.Marshal(pessoa)
+
+	errCache := client.Set(pessoa.Id, json, 0).Err()
+
+	if errCache != nil {
+		fmt.Println(errCache)
+	}
+
+	errCache = client.Set(pessoa.Apelido, "t", 0).Err()
+
+	if errCache != nil {
+		fmt.Println(errCache)
+	}
 
 	return pessoa, err
 }
@@ -56,10 +80,19 @@ func GetPessoas(term string) ([]Pessoas, error) {
 
 func GetPessoasById(id string) (Pessoas, error) {
 	var pessoa Pessoas
+	client := config.ConnectRedis()
+
+	val, _ := client.Get(id).Result()
+
+	err := json.Unmarshal([]byte(val), &pessoa)
+
+	if err == nil {
+		return pessoa, err
+	}
 
 	db := config.ConnectDatabase()
 
-	err := db.Raw("SELECT * FROM pessoas WHERE id = ?", id).Scan(&pessoa).Error
+	err = db.Raw("SELECT * FROM pessoas WHERE id = ?", id).Scan(&pessoa).Error
 
 	return pessoa, err
 }

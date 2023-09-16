@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"rinhabackendleo/src/models"
 	"time"
@@ -104,8 +103,6 @@ func GetPessoaById(c *gin.Context) {
 		c.Status(http.StatusNotFound)
 		return
 	}
-
-	fmt.Println(fmtPessoa)
 
 	c.JSON(http.StatusOK, fmtPessoa)
 }

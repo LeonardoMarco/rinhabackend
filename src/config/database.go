@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/jinzhu/gorm"
@@ -31,8 +30,6 @@ func ConnectDatabase() *gorm.DB {
 			" password="+connection.Password+" sslmode=disable")
 	if err != nil {
 		panic("Failed to connect database")
-	} else {
-		fmt.Println("Conectou")
 	}
 
 	db.LogMode(false)
