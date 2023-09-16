@@ -15,4 +15,4 @@ CREATE TABLE pessoas (
 	stack  VARCHAR []
 );
 
-CREATE INDEX pessoas_search_index_idx ON pessoas USING gin (apelido, nome, stack);
+CREATE INDEX pessoas_search_index_idx ON pessoas (apelido, nome, stack);

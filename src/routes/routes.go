@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"rinhabackendleo/src/config"
 	"rinhabackendleo/src/controllers"
 
 	"github.com/gin-gonic/gin"
@@ -8,6 +9,14 @@ import (
 
 func InitRoutes() *gin.Engine {
 	r := gin.Default()
+
+	db := config.ConnectDatabase()
+	client := config.ConnectRedis()
+
+	r.Use(func(c *gin.Context) {
+		c.Set("DB_CONTEXT", db)
+		c.Set("CACHE_CONTEXT", client)
+	})
 
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{"message": "pong"})

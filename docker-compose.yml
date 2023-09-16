@@ -20,7 +20,7 @@ services:
         limits:
           cpus: '0.25'
           memory: '0.5GB'
-
+    restart: on-failure # will restart until it's success
   api2: # API - Instância 01
     build: .
     hostname: api2
@@ -41,7 +41,7 @@ services:
         limits:
           cpus: '0.25'
           memory: '0.5GB'
-
+    restart: on-failure # will restart until it's success
   nginx: # Load Balancer
     image: nginx:latest
     volumes:
@@ -56,6 +56,7 @@ services:
         limits:
           cpus: '0.25'
           memory: '0.5GB'
+    restart: on-failure # will restart until it's success
   db: # Banco de dados
     image: postgres
     deploy:

@@ -6,10 +6,14 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
+	"github.com/jinzhu/gorm"
 )
 
 func CreatePessoa(c *gin.Context) {
 	var RequestData models.Pessoas
+	db := c.MustGet("DB_CONTEXT").(*gorm.DB)
+	cache := c.MustGet("CACHE_CONTEXT").(*redis.Client)
 
 	if err := c.ShouldBindJSON(&RequestData); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": "Validation error"})
@@ -21,7 +25,7 @@ func CreatePessoa(c *gin.Context) {
 		return
 	}
 
-	pessoa, err := models.CreatePessoa(RequestData)
+	pessoa, err := models.CreatePessoa(RequestData, db, cache)
 
 	if err != nil {
 		c.Status(http.StatusUnprocessableEntity)
@@ -49,7 +53,9 @@ func GetPessoas(c *gin.Context) {
 		return
 	}
 
-	pessoas, err := models.GetPessoas(term)
+	db := c.MustGet("DB_CONTEXT").(*gorm.DB)
+
+	pessoas, err := models.GetPessoas(term, db)
 
 	if err != nil {
 		c.Status(http.StatusBadGateway)
@@ -81,7 +87,10 @@ func GetPessoas(c *gin.Context) {
 func GetPessoaById(c *gin.Context) {
 	id := c.Params.ByName("id")
 
-	pessoa, err := models.GetPessoasById(id)
+	db := c.MustGet("DB_CONTEXT").(*gorm.DB)
+	cache := c.MustGet("CACHE_CONTEXT").(*redis.Client)
+
+	pessoa, err := models.GetPessoasById(id, db, cache)
 
 	if err != nil {
 		c.Status(http.StatusBadGateway)
@@ -108,7 +117,8 @@ func GetPessoaById(c *gin.Context) {
 }
 
 func GetPessoasCount(c *gin.Context) {
-	count, err := models.GetPessoasCount()
+	db := c.MustGet("DB_CONTEXT").(*gorm.DB)
+	count, err := models.GetPessoasCount(db)
 
 	if err != nil {
 		c.Status(http.StatusBadGateway)

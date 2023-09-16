@@ -3,8 +3,9 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"rinhabackendleo/src/config"
 
+	"github.com/go-redis/redis"
+	"github.com/jinzhu/gorm"
 	"github.com/lib/pq"
 )
 
@@ -16,9 +17,7 @@ type Pessoas struct {
 	Stack      pq.StringArray `json:"stack"`
 }
 
-func CreatePessoa(req Pessoas) (Pessoas, error) {
-	db := config.ConnectDatabase()
-	client := config.ConnectRedis()
+func CreatePessoa(req Pessoas, db *gorm.DB, client *redis.Client) (Pessoas, error) {
 
 	val, _ := client.Get(req.Apelido).Result()
 
@@ -57,10 +56,8 @@ func CreatePessoa(req Pessoas) (Pessoas, error) {
 	return pessoa, err
 }
 
-func GetPessoas(term string) ([]Pessoas, error) {
+func GetPessoas(term string, db *gorm.DB) ([]Pessoas, error) {
 	var pessoas []Pessoas
-
-	db := config.ConnectDatabase()
 
 	query := `
 		SELECT * 
@@ -78,9 +75,8 @@ func GetPessoas(term string) ([]Pessoas, error) {
 	return pessoas, err
 }
 
-func GetPessoasById(id string) (Pessoas, error) {
+func GetPessoasById(id string, db *gorm.DB, client *redis.Client) (Pessoas, error) {
 	var pessoa Pessoas
-	client := config.ConnectRedis()
 
 	val, _ := client.Get(id).Result()
 
@@ -90,17 +86,13 @@ func GetPessoasById(id string) (Pessoas, error) {
 		return pessoa, err
 	}
 
-	db := config.ConnectDatabase()
-
 	err = db.Raw("SELECT * FROM pessoas WHERE id = ?", id).Scan(&pessoa).Error
 
 	return pessoa, err
 }
 
-func GetPessoasCount() (int, error) {
+func GetPessoasCount(db *gorm.DB) (int, error) {
 	var count int
-
-	db := config.ConnectDatabase()
 
 	err := db.Raw("SELECT COUNT(*) FROM pessoas").Row().Scan(&count)
 
